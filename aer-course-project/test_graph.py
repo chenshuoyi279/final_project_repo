@@ -2,20 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-min_point = np.array([-3.,-3., 0])
+min_point = np.array([-3., -3., 0])
 max_point = np.array([3., 3., 2])
 
-obs_size = np.array([0.10,0.10,1.5])
-gate_size = np.array([0.20,0.40,0.4])
+obs_size = np.array([0.06, 0.06, 1.5])
+gate_size = np.array([0.10, 0.40, 0.4])
 
-obs_locs = np.array([[1.5, -2.5, 0.75 ],
-                            [0.5, -1.0, 0.75],
-                            [1.5, 0., 0.75],
-                            [-1., 0., 0.75]])
-gate_locs = np.array([[0.5,-2.5,1.],
-                      [2,-1.5,1.],
-                      [0,0.2,1.],
-                      [-0.5,1.5,1.]])
+obs_locs = np.array([[1.5, -2.5, 0.75],
+                     [0.5, -1.0, 0.75],
+                     [1.5,  0.,  0.75],
+                     [-1.,  0.,  0.75]])
+gate_locs = np.array([[0.5, -2.5, 1.],
+                      [2.,  -1.5, 1.],
+                      [0.,   0.2, 1.],
+                      [-0.5, 1.5, 1.]])
 
 class OctreeNode:
     def __init__(self, center, size,parent=None,label=None):
@@ -89,7 +89,7 @@ class Octree:
                     RootNode.isLeaf = False
                     for i in range(8):
                         self.add_obstacle(RootNode.children[i],ObsLoc,ObsSize)
-             else:
+            else:
                  self.curDepth +=1
                  for i in range(8):
                     self.add_obstacle(RootNode.children[i],ObsLoc,ObsSize)
@@ -123,7 +123,7 @@ class Octree:
         Print all the nodes in the tree and indent each time you go down a level
         """
         if node is not None:
-            print( node.Label +'\t' +str(node.center) + '\t'+ str(node.Depth) + '\tObs:\t' + str(node.containsObs) + '\tGate:\t' + str(node.containsGate))
+            print(node.Label +'\t' +str(node.center) + '\t'+ str(node.Depth) + '\tObs:\t' + str(node.containsObs) + '\tGate:\t' + str(node.containsGate))
             for child in node.children:
                 self.print_tree(child, level + 1)
 
@@ -134,10 +134,10 @@ size =np.array([6.,6.,2.])
 BaseNode = OctreeNode(center,size)
 Tree = Octree(BaseNode)
 Tree.add_obstacle(Tree.root,obs_locs[0],obs_size)
-Tree.curDepth = 0;
+Tree.curDepth = 0
 Tree.print_tree(Tree.root)
 print('-----------------------------------------')
-Tree.add_obstacle(Tree.root,obs_locs[1],obs_size)
-Tree.print_tree(Tree.root)
+#Tree.add_obstacle(Tree.root,obs_locs[2],obs_size)
+#Tree.print_tree(Tree.root)
 
 #test.children[0].center
