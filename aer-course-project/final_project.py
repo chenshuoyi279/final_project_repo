@@ -12,10 +12,9 @@ import inspect
 import numpy as np
 import pybullet as p
 
+
 from functools import partial
 from rich.tree import Tree
-from rich import print
-
 from safe_control_gym.utils.configuration import ConfigFactory
 from safe_control_gym.utils.registration import make
 from safe_control_gym.utils.utils import sync
@@ -98,7 +97,7 @@ def run(test=False):
     # NOTE: students can get access to the information of the gates and obstacles 
     #       when creating the controller object. 
     ctrl = Controller(vicon_obs, info, config.use_firmware, verbose=config.verbose)
-
+    # print("info is "  +info["nominal_obstacles_pos"])
     # Create counters
     episodes_count = 1
     cumulative_reward = 0
