@@ -234,7 +234,6 @@ def A_s(s_start,s_goal,obs):
     s_start=discretize_coordinates(s_start[0],s_start[1])
     s_goal=discretize_coordinates(s_goal[0],s_goal[1])
     astar = AStar(s_start, s_goal, "euclidean",obs)
-    plot = plotting.Plotting(s_start, s_goal)
     path, visited = astar.searching()
 
     continuous_path = []
