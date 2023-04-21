@@ -32,7 +32,7 @@ import time
 import numpy as np
 import math
 from collections import deque
-from Search_based_Planning.Search_2D import plotting, env,Astar
+from Search_based_Planning.Search_2D import  env,Astar
 try:
     from project_utils import Command, PIDController, timing_step, timing_ep, plot_trajectory, draw_trajectory
 except ImportError:
