@@ -322,7 +322,7 @@ class Controller():
         dt=15
         # print("The info. of the gates ")
         # print(self.NOMINAL_GATES)
-        t1 = t.perf_counter()
+
         if iteration == 0:
             height = 1
             duration = 2
