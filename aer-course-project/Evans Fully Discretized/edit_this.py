@@ -26,9 +26,6 @@ Tips:
         2) cmdFirmware
 
 """
-# source ~/anaconda3/etc/profile.d/conda.sh
-# then conda activate aer1217-project
-import time 
 import numpy as np
 import math
 from collections import deque
@@ -45,11 +42,7 @@ except ImportError:
 
 # Optionally, create and import modules you wrote.
 # Please refrain from importing large or unstable 3rd party packages.
-# try:
-#     import example_custom_utils as ecu
-# except ImportError:
-#     # PyTest import.
-#     from . import example_custom_utils as ecu
+
 
 #########################
 # REPLACE THIS (END) ####
@@ -113,7 +106,7 @@ class Controller():
         self.reset()
         self.interEpisodeReset()
 
-        # perform trajectory planning
+        # porm trajectory planning
         t_scaled = self.planning(use_firmware, initial_info)
 
         ## visualization
@@ -150,16 +143,35 @@ class Controller():
         #########################
         ## generate waypoints for planning
 
+        # Call a function in module `example_custom_utils`.
+ 
+
         # initial waypoint where it takes off
         if use_firmware:
             waypoints = [(self.initial_obs[0], self.initial_obs[2], initial_info["gate_dimensions"]["tall"]["height"])]  # Height is hardcoded scenario knowledge.
         else:
             waypoints = [(self.initial_obs[0], self.initial_obs[2], self.initial_obs[4])]
-        t1 = time.perf_counter()
+        # print("nominal_gates_pos_and_type", initial_info["nominal_gates_pos_and_type"])
+        # print("obstacles", initial_info["nominal_obstacles_pos"])
+    
+        # print("waypoints", waypoints)
+
+
+
+
+
+
 #get gate obstacles
+        # gate_obstacles = []
+        # for gate in initial_info['nominal_gates_pos_and_type']:
+        #     x, y, _, _, _, yaw, _ = gate
+        #     obstacle1, obstacle2 = self.gate_obstacle_coordinates(x, y, yaw)
+        #     obstacle1_discrete =self.discrete_coordinates(*obstacle1)
+        #     obstacle2_discrete = self.discrete_coordinates(*obstacle2)
+        #     gate_obstacles.extend([obstacle1_discrete, obstacle2_discrete])
+        # print("gate_obstacles", gate_obstacles)
 
-
-        gate_obstacle_diameter = 0.1
+        gate_obstacle_diameter = 0.05
         discretized_gate_obstacles = []
         for gate in initial_info['nominal_gates_pos_and_type']:
             x, y, _, _, _, yaw, _ = gate
@@ -167,6 +179,10 @@ class Controller():
             discretized_obstacle1 = self.discretize_obstacle(*obstacle1, gate_obstacle_diameter)
             discretized_obstacle2 = self.discretize_obstacle(*obstacle2, gate_obstacle_diameter)
             discretized_gate_obstacles.extend(discretized_obstacle1 + discretized_obstacle2)
+   
+
+
+
         grid_size=0.05
 #get obstacles
         obstacles=initial_info['nominal_obstacles_pos']
@@ -182,29 +198,44 @@ class Controller():
     
 
         all_discretized_obstacles = discretized_obstacles + discretized_gate_obstacles
+
+
+
         print("discretized_obstacles", discretized_obstacles)
+
+
+
+
+
+
+
+
+
+#planning
+        #get the way points
+        distance_between_gate=0.3
         s_start = (self.initial_obs[0], self.initial_obs[2])
+        # print("s_start", s_start)
+        # s_goal= (1, 1)
+        # path=A_s(s_start,s_goal,discretized_obstacles)
         paths = []
         gate_waypoints = []
-        gate_count = len(initial_info['nominal_gates_pos_and_type'])
-        # Rearrange the sequence of the gates
-        gates_sequence = list(range(gate_count))
-        gates_sequence = [0,1,3,2]  # Update this if the number of gates changes
-        # Iterate through the rearranged sequence of gates
-        for index in gates_sequence:
-            gate = initial_info['nominal_gates_pos_and_type'][index]
+        # print(initial_info['nominal_gates_pos_and_type'])
+        for gate in initial_info['nominal_gates_pos_and_type']:
             x, y, _, _, _, yaw, _ = gate
-            # Update distance_between_gate for the second last gate
-            if index == gate_count - 4:
-                distance_between_gate = 0.3
-            else:
-                distance_between_gate = 0.3
-
-            waypoint1_x = x + distance_between_gate * math.cos(yaw + math.pi / 2)
+            # Calculate the waypoints
+            waypoint1_x = x + distance_between_gate* math.cos(yaw + math.pi / 2)
             waypoint1_y = y + distance_between_gate * math.sin(yaw + math.pi / 2)
             waypoint2_x = x + distance_between_gate * math.cos(yaw - math.pi / 2)
             waypoint2_y = y + distance_between_gate * math.sin(yaw - math.pi / 2)
             gate_waypoints.append(((waypoint1_x, waypoint1_y), (waypoint2_x, waypoint2_y)))
+#         gate_waypoints=[
+#     ((0.25, -2.5), (0.75, -2.5)),
+#     ((2.0, -1.25), (2.0, -1.75)),
+#     ((0.25, 0.2), (-0.25, 0.2)),
+#     ((-0.5, 1.75), (-0.5, 1.25))
+# ]         
+     
 
         current_point = s_start
         rearranged_waypoints = []
@@ -220,31 +251,32 @@ class Controller():
                 current_point = wp1
         
         rearranged_waypoints.extend([(-0.5,2.0)])
-
         print("rearranged_waypoints", rearranged_waypoints)
-        #all_discretized_obstacles is generated earlier from this code, pasted here to save time
-        all_discretized_obstacles=   [(97, 17), (97, 18), (97, 19), (97, 20), (97, 21), (98, 17), 
-                                      (98, 18), (98, 19), (98, 20), (98, 21), (99, 17), (99, 18), 
-                                      (99, 19), (99, 20), (99, 21), (100, 17), (100, 18), (100, 19), 
-                                      (100, 20), (100, 21), (101, 17), (101, 18), (101, 19), (101, 20),
-                                        (101, 21), (77, 47), (77, 48), (77, 49), (77, 50), (77, 51), 
-                                        (78, 47), (78, 48), (78, 49), (78, 50), (78, 51), (79, 47), (79, 48), 
-                                        (79, 49), (79, 50), (79, 51), (80, 47), (80, 48), (80, 49), (80, 50), 
-                                        (80, 51), (81, 47), (81, 48), (81, 49), (81, 50), (81, 51), (97, 67), 
-                                        (97, 68), (97, 69), (97, 70), (97, 71), (98, 67), (98, 68), (98, 69), 
-                                        (98, 70), (98, 71), (99, 67), (99, 68), (99, 69), (99, 70), (99, 71), 
-                                        (100, 67), (100, 68), (100, 69), (100, 70), (100, 71), (101, 67), (101, 68), 
-                                        (101, 69), (101, 70), (101, 71), (47, 67), (47, 68), (47, 69), (47, 70), 
-                                        (47, 71), (48, 67), (48, 68), (48, 69), (48, 70), (48, 71), (49, 67),
-                                          (49, 68), (49, 69), (49, 70), (49, 71), (50, 67), (50, 68), (50, 69), 
-                                          (50, 70), (50, 71), (51, 67), (51, 68), (51, 69), (51, 70), (51, 71)]
-    
+        all_discretized_obstacles=[(97, 17), (97, 18), (97, 19), (97, 20), (97, 21), (98, 17), 
+                           (98, 18), (98, 19), (98, 20), (98, 21), (99, 17), (99, 18), 
+                           (99, 19), (99, 20), (99, 21), (100, 17), (100, 18), (100, 19), 
+                           (100, 20), (100, 21), (101, 17), (101, 18), (101, 19), (101, 20), 
+                           (101, 21), (77, 47), (77, 48), (77, 49), (77, 50), (77, 51), 
+                           (78, 47), (78, 48), 
+(78, 49), (78, 50), (78, 51), (79, 47), (79, 48), (79, 49), (79, 50), (79, 51),
+ (80, 47), 
+(80, 48), (80, 49), (80, 50), (80, 51), (81, 47), (81, 48), (81, 49), (81, 50), 
+(81, 51), (97, 67), (97, 68), (97, 69), (97, 70), (97, 71), (98, 67), (98, 68), 
+(98, 69), (98, 70), (98, 71), (99, 67), (99, 68), (99, 69), (99, 70), (99, 71),
+ (100, 67), (100, 68), (100, 69), (100, 70), (100, 71), (101, 67), (101, 68), 
+ (101, 69), (101, 70), (101, 71), (47, 67), (47, 68), (47, 69), (47, 70), (47, 71), 
+ (48, 67), (48, 68), (48, 69), (48, 70), (48, 71), (49, 67), (49, 68), (49, 69),
+   (49, 70), (49, 71), (50, 67), (50, 68), (50, 69), (50, 70), (50, 71), (51, 67),
+     (51, 68), (51, 69), (51, 70), (51, 71)]
 
     
         for waypoint in rearranged_waypoints:
             s_goal = waypoint  # Discretize the waypoint
-
+            # print("planning")
+            # print("s_goal", s_goal)
+            # print("all_discretized_obstacles",all_discretized_obstacles)
             path = Astar.A_s(s_start, s_goal, all_discretized_obstacles)
+            # print( "path", path )
             path = path[::-1]
             paths.append(path)
             s_start = s_goal  # Update the starting point for the next iteration
@@ -256,30 +288,43 @@ class Controller():
                 concatenated_path.extend(path)
             else:
                 concatenated_path.extend(path[1:])
-
+        #check number of nodes in concatenated path
+        print("concatenated_path", len(concatenated_path))
         
         # path = path[::-1]
         for coord in concatenated_path:
             x, y = coord
             waypoints.append((x, y, 1))
+            
+        # print(waypoints)
+        # Example code: hardcode waypoints 
+        # waypoints.append((-0.5, -3.0, 2.0))
+        # waypoints.append((-0.5, -2.0, 2.0))
+        # waypoints.append((-0.5, -1.0, 2.0))
+        # waypoints.append((-0.5,  0.0, 2.0))
+        # waypoints.append((-0.5,  1.0, 2.0))
+        # waypoints.append((-0.5,  2.0, 2.0))
+        # waypoints.append([initial_info["x_reference"][0], initial_info["x_reference"][2], initial_info["x_reference"][4]])
 
         # Polynomial fit.
         self.waypoints = np.array(waypoints)
-        deg =25
+        deg =12
         t = np.arange(self.waypoints.shape[0])
         fx = np.poly1d(np.polyfit(t, self.waypoints[:,0], deg))
         fy = np.poly1d(np.polyfit(t, self.waypoints[:,1], deg))
         fz = np.poly1d(np.polyfit(t, self.waypoints[:,2], deg))
-        duration =8
+        duration = 15
         t_scaled = np.linspace(t[0], t[-1], int(duration*self.CTRL_FREQ))
         self.ref_x = fx(t_scaled)
         self.ref_y = fy(t_scaled)
         self.ref_z = fz(t_scaled)
+        # print("fx is"   , self.ref_x)
+        # print("fy is"   , self.ref_y)
+        # print("fz is"   , self.ref_z)
         #########################
         # REPLACE THIS (END) ####
         #########################
-        t2 = time.perf_counter()
-        print("Planning time: ", t2-t1)
+
         return t_scaled
 
     def cmdFirmware(self,
@@ -318,8 +363,8 @@ class Controller():
         # print("iteration: ", iteration)
         #########################
         # REPLACE THIS (START) ##
-        ########################        #
-        dt=15
+        #########################
+
         # print("The info. of the gates ")
         # print(self.NOMINAL_GATES)
 
@@ -331,7 +376,7 @@ class Controller():
             args = [height, duration]
 
         # [INSTRUCTIONS] Example code for using cmdFullState interface   
-        elif iteration >= 3*self.CTRL_FREQ and iteration < dt*self.CTRL_FREQ:
+        elif iteration >= 3*self.CTRL_FREQ and iteration < 20*self.CTRL_FREQ:
             step = min(iteration-3*self.CTRL_FREQ, len(self.ref_x) -1)
             target_pos = np.array([self.ref_x[step], self.ref_y[step], self.ref_z[step]])
             target_vel = np.zeros(3)
@@ -342,28 +387,39 @@ class Controller():
             command_type = Command(1)  # cmdFullState.
             args = [target_pos, target_vel, target_acc, target_yaw, target_rpy_rates]
 
-        elif iteration == dt*self.CTRL_FREQ:
+        elif iteration == 20*self.CTRL_FREQ:
             command_type = Command(6)  # Notify setpoint stop.
             args = []
 
        # [INSTRUCTIONS] Example code for using goTo interface 
-        # elif iteration == (dt+1)*self.CTRL_FREQ+1:7
-        #     y = self.initial_obs[2]
-        #     z = 1.5
-        #     yaw = 0.
-        #     duration = 6
+        elif iteration == 20*self.CTRL_FREQ+1:
+            x = self.ref_x[-1]
+            y = self.ref_y[-1]
+            z = 1.5 
+            yaw = 0.
+            duration = 2.5
 
-        #     command_type = Command(5)  # goTo.
-        #     args = [[x, y, z], yaw, duration, False]
+            command_type = Command(5)  # goTo.
+            args = [[x, y, z], yaw, duration, False]
 
-        elif iteration == (dt+2)*self.CTRL_FREQ:
+        elif iteration == 23*self.CTRL_FREQ:
+            x = self.initial_obs[0]
+            y = self.initial_obs[2]
+            z = 1.5
+            yaw = 0.
+            duration = 6
+
+            command_type = Command(5)  # goTo.
+            args = [[x, y, z], yaw, duration, False]
+
+        elif iteration == 30*self.CTRL_FREQ:
             height = 0.
             duration = 3
 
             command_type = Command(3)  # Land.
             args = [height, duration]
 
-        elif iteration == dt*self.CTRL_FREQ-1:
+        elif iteration == 33*self.CTRL_FREQ-1:
             command_type = Command(4)  # STOP command to be sent once the trajectory is completed.
             args = []
 
@@ -371,14 +427,10 @@ class Controller():
             command_type = Command(0)  # None.
             args = []
 
-        #########################Example
+        #########################
         # REPLACE THIS (END) ####
         #########################
-        # t3 = t.perf_counter()
 
-        # # print( "Planning Time is: ",t3-t1)
-        # elapsed_time = t3 - t1
-        # print("Elapsed time:", elapsed_time)
         return command_type, args
 
     def cmdSimOnly(self,
