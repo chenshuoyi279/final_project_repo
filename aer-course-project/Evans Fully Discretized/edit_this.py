@@ -179,7 +179,7 @@ class Controller():
             discretized_obstacle1 = self.discretize_obstacle(*obstacle1, gate_obstacle_diameter)
             discretized_obstacle2 = self.discretize_obstacle(*obstacle2, gate_obstacle_diameter)
             discretized_gate_obstacles.extend(discretized_obstacle1 + discretized_obstacle2)
-   
+
 
 
 
